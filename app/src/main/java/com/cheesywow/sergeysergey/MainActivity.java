@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         addArrowListeners();
         addJoystick();
-
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -111,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
         final ImageView circle = findViewById(R.id.circle);
         final ImageView control = findViewById(R.id.control);
 
-        circle.setX(circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2);
-        circle.setY(circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2);
+//        control.setX(circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2);
+//        control.setY(circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2);
 
         circle.setOnClickListener(new View.OnClickListener() {
             @Override
