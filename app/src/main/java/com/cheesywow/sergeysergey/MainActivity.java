@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,7 +15,13 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     public final int movingSpeed = 5;
+    boolean down = true;
 
+    float cursorX;
+    float cursorY;
+
+    float hSpeed;
+    float vSpeed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,51 +127,64 @@ public class MainActivity extends AppCompatActivity {
 
         circle.setOnTouchListener(new View.OnTouchListener(){
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                 float cursorX;
-                 float cursorY;
-
-                if (event.getAction() != MotionEvent.ACTION_UP) {
-                    cursorX = event.getX() + circle.getX();
-                    cursorY = event.getY() + circle.getY();
-                }else{
+            public boolean onTouch(View v, MotionEvent event){
+                Log.d("TRACKPAD EVENT",""+event);
+                if(event.getAction() == MotionEvent.ACTION_UP){
                     cursorX = circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2;
                     cursorY = circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2;
+                    down = false;
                 }
 
-                if (cursorX < circle.getX())
-                    cursorX = circle.getX();
-                if (cursorX > circle.getX() + circle.getWidth() - control.getWidth())
-                    cursorX = circle.getX() + circle.getWidth() - control.getWidth();
+                else if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    down = true;
+                    cursorX = event.getX() + circle.getX();
+                    cursorY = event.getY() + circle.getY();
+                    new Thread(new Runnable() {
+                        public void run() {
+                            while(down){
+                                try {
+                                    Thread.sleep(5);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                if (cursorX < circle.getX())
+                                    cursorX = circle.getX();
+                                if (cursorX > circle.getX() + circle.getWidth() - control.getWidth())
+                                    cursorX = circle.getX() + circle.getWidth() - control.getWidth();
 
-                if (cursorY < circle.getY())
-                    cursorY = circle.getY();
-                if (cursorY > circle.getY() + circle.getHeight() - control.getHeight())
-                    cursorY = circle.getY() + circle.getHeight() - control.getHeight();
+                                if (cursorY < circle.getY())
+                                    cursorY = circle.getY();
+                                if (cursorY > circle.getY() + circle.getHeight() - control.getHeight())
+                                    cursorY = circle.getY() + circle.getHeight() - control.getHeight();
 
-                control.setX(cursorX);
-                control.setY(cursorY);
+                                control.setX(cursorX);
+                                control.setY(cursorY);
 
-                float hSpeed;
-                float vSpeed;
+                                float hDifference = control.getX() - circle.getX() - circle.getWidth() / 2;
+                                if (hDifference > 0)
+                                    hDifference = control.getX() + control.getWidth() - circle.getX() - circle.getWidth() / 2;
 
-                float hDifference = control.getX() - circle.getX() - circle.getWidth() / 2;
-                if (hDifference > 0)
-                    hDifference = control.getX() + control.getWidth() - circle.getX() - circle.getWidth() / 2;
+                                float vDifference = control.getY() - circle.getY() - circle.getHeight() / 2;
+                                if (vDifference > 0)
+                                    vDifference = control.getY() + control.getHeight() - circle.getY() - circle.getHeight() / 2;
 
-                float vDifference = control.getY() - circle.getY() - circle.getHeight() / 2;
-                if (vDifference > 0)
-                    vDifference = control.getY() + control.getHeight() - circle.getY() - circle.getHeight() / 2;
+                                hSpeed = movingSpeed * hDifference / circle.getWidth() * 2;
+                                vSpeed = movingSpeed * vDifference / circle.getHeight() * 2;
 
-                hSpeed = movingSpeed * hDifference / circle.getWidth() * 2;
-                vSpeed = movingSpeed * vDifference / circle.getHeight() * 2;
+                                // System.out.println(hSpeed + " " + vSpeed);
+                                final ImageView sergey = findViewById(R.id.img);
+                                sergey.setX(sergey.getX() + hSpeed);
+                                sergey.setY(sergey.getY() + vSpeed);
+                            }
 
-                // System.out.println(hSpeed + " " + vSpeed);
-                final ImageView sergey = findViewById(R.id.img);
-                sergey.setX(sergey.getX() + hSpeed);
-                sergey.setY(sergey.getY() + vSpeed);
+                        }
+                    }).start();
+                }
 
-
+                else if(event.getAction() == MotionEvent.ACTION_MOVE){
+                    cursorX = event.getX() + circle.getX();
+                    cursorY = event.getY() + circle.getY();
+                }
                 return false;
             }
         });
