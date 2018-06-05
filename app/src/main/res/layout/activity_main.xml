@@ -76,7 +76,8 @@
             app:layout_row="1"
             app:srcCompat="@drawable/right"
             tools:layout_editor_absoluteX="322dp"
-            tools:layout_editor_absoluteY="432dp" />
+            tools:layout_editor_absoluteY="432dp"
+            android:layout_alignParentRight="true" />
 
         <ImageView
             android:id="@+id/leftArrow"
@@ -88,7 +89,8 @@
             app:layout_row="1"
             app:srcCompat="@drawable/left"
             tools:layout_editor_absoluteX="217dp"
-            tools:layout_editor_absoluteY="432dp" />
+            tools:layout_editor_absoluteY="432dp"
+            android:layout_alignParentLeft="true" />
     </android.support.v7.widget.GridLayout>
 
     <ImageView
