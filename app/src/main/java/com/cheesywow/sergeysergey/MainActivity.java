@@ -1,7 +1,18 @@
 package com.cheesywow.sergeysergey;
 
 import android.annotation.SuppressLint;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,10 +34,14 @@ public class MainActivity extends AppCompatActivity {
     float hSpeed;
     float vSpeed;
 
+    float centreX;
+    float centreY;
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.test);
 
         ImageView sergey = findViewById(R.id.img);
 
@@ -45,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
         addArrowListeners();
         addJoystick();
+        //view = new Coordinate_View(this);
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -112,12 +129,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void addJoystick(){
         final ImageView circle = findViewById(R.id.circle);
         final ImageView control = findViewById(R.id.control);
 
 //        control.setX(circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2);
 //        control.setY(circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2);
+
+        centreX = circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2;
+        centreY = circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2;
+
 
         circle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,13 +148,20 @@ public class MainActivity extends AppCompatActivity {
 
 
         circle.setOnTouchListener(new View.OnTouchListener(){
+            Coordinate_View view = findViewById(R.id.drawing_screen);
+
             @Override
-            public boolean onTouch(View v, MotionEvent event){
-                Log.d("TRACKPAD EVENT",""+event);
+            public boolean onTouch(View v, final MotionEvent event){
+                view.setCentreCircle(circle.getX()+ circle.getWidth() / 2,
+                                     circle.getY()+ circle.getHeight() / 2);
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     cursorX = circle.getX() + circle.getWidth() / 2 - control.getWidth() / 2;
                     cursorY = circle.getY() + circle.getHeight() / 2 - control.getHeight() / 2;
                     down = false;
+                    view.setCentreCircle(0,0);
+                    view.setCentreControl(0,0);
+                    view.setTouchCoordinates(0,0);
+                    view.updateOverlay();
                 }
 
                 else if(event.getAction() == MotionEvent.ACTION_DOWN){
@@ -184,6 +213,28 @@ public class MainActivity extends AppCompatActivity {
                 else if(event.getAction() == MotionEvent.ACTION_MOVE){
                     cursorX = event.getX() + circle.getX();
                     cursorY = event.getY() + circle.getY();
+                    if (cursorX < circle.getX())
+                        cursorX = circle.getX();
+                    if (cursorX > circle.getX() + circle.getWidth() - control.getWidth())
+                        cursorX = circle.getX() + circle.getWidth() - control.getWidth();
+
+                    if (cursorY < circle.getY())
+                        cursorY = circle.getY();
+                    if (cursorY > circle.getY() + circle.getHeight() - control.getHeight())
+                        cursorY = circle.getY() + circle.getHeight() - control.getHeight();
+
+                    control.setX(cursorX);
+                    control.setY(cursorY);
+
+                    view.setCentreControl(  cursorX+control.getWidth()/2,
+                                            cursorY+control.getHeight()/2);
+
+                    view.setTouchCoordinates(   event.getRawX(),
+                                                event.getRawY());
+
+                    view.updateOverlay();
+                    //Log.d("LOC START","X: "+cursorX+",Y: "+cursorY);
+                    //Log.d("LOC END","X: "+event.getRawX()+",Y: "+event.getRawY());
                 }
                 return false;
             }
