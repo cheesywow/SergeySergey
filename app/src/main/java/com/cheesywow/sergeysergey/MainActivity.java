@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
     float centreX;
     float centreY;
 
+    float hDifference;
+    float vDifference;
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,26 +179,8 @@ public class MainActivity extends AppCompatActivity {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-                                if (cursorX < circle.getX())
-                                    cursorX = circle.getX();
-                                if (cursorX > circle.getX() + circle.getWidth() - control.getWidth())
-                                    cursorX = circle.getX() + circle.getWidth() - control.getWidth();
-
-                                if (cursorY < circle.getY())
-                                    cursorY = circle.getY();
-                                if (cursorY > circle.getY() + circle.getHeight() - control.getHeight())
-                                    cursorY = circle.getY() + circle.getHeight() - control.getHeight();
-
                                 control.setX(cursorX);
                                 control.setY(cursorY);
-
-                                float hDifference = control.getX() - circle.getX() - circle.getWidth() / 2;
-                                if (hDifference > 0)
-                                    hDifference = control.getX() + control.getWidth() - circle.getX() - circle.getWidth() / 2;
-
-                                float vDifference = control.getY() - circle.getY() - circle.getHeight() / 2;
-                                if (vDifference > 0)
-                                    vDifference = control.getY() + control.getHeight() - circle.getY() - circle.getHeight() / 2;
 
                                 hSpeed = movingSpeed * hDifference / circle.getWidth() * 2;
                                 vSpeed = movingSpeed * vDifference / circle.getHeight() * 2;
@@ -211,27 +196,35 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 else if(event.getAction() == MotionEvent.ACTION_MOVE){
-                    cursorX = event.getX() + circle.getX();
-                    cursorY = event.getY() + circle.getY();
-                    if (cursorX < circle.getX())
-                        cursorX = circle.getX();
-                    if (cursorX > circle.getX() + circle.getWidth() - control.getWidth())
-                        cursorX = circle.getX() + circle.getWidth() - control.getWidth();
-
-                    if (cursorY < circle.getY())
-                        cursorY = circle.getY();
-                    if (cursorY > circle.getY() + circle.getHeight() - control.getHeight())
-                        cursorY = circle.getY() + circle.getHeight() - control.getHeight();
-
+                    float x = event.getX()-circle.getWidth()/2-control.getWidth()/2;
+                    float y = event.getY()-circle.getHeight()/2-control.getHeight()/2;
+                    double distance = Math.sqrt(Math.pow(x,2)+ (float) Math.pow(y,2));
+                    //Log.d("Distance",""+distance);
+                    if (distance > circle.getWidth()/2){
+                        double angle  = Math.atan2(x,y);
+                        cursorX = (float) ((circle.getWidth()/2)*Math.sin(angle));
+                        cursorY = (float) ((circle.getHeight()/2)*Math.cos(angle));
+                        cursorX+=circle.getX()+circle.getWidth()/2-control.getWidth()/2;
+                        cursorY+=circle.getY()+circle.getHeight()/2-control.getHeight()/2;
+                    }
+                    else{
+                        cursorX = x+circle.getX()+circle.getWidth()/2-control.getWidth()/2;
+                        cursorY = y+circle.getY()+circle.getHeight()/2-control.getHeight()/2;
+                    }
                     control.setX(cursorX);
                     control.setY(cursorY);
 
+                    hDifference = control.getX() - circle.getX() - circle.getWidth() / 2;
+                    if (hDifference > 0)
+                        hDifference = control.getX() + control.getWidth() - circle.getX() - circle.getWidth() / 2;
+
+                    vDifference = control.getY() - circle.getY() - circle.getHeight() / 2;
+                    if (vDifference > 0)
+                        vDifference = control.getY() + control.getHeight() - circle.getY() - circle.getHeight() / 2;
+
                     view.setCentreControl(  cursorX+control.getWidth()/2,
                                             cursorY+control.getHeight()/2);
-
-                    view.setTouchCoordinates(   event.getRawX(),
-                                                event.getRawY());
-
+                    view.setTouchCoordinates(event.getRawX(), event.getRawY());
                     view.updateOverlay();
                     //Log.d("LOC START","X: "+cursorX+",Y: "+cursorY);
                     //Log.d("LOC END","X: "+event.getRawX()+",Y: "+event.getRawY());
